@@ -1,46 +1,32 @@
-# AI-Based Vehicle Detection, Tracking and Counting System
+# Vehicle Detection, Tracking & Counting using YOLOv8
 
-This project implements a computer vision-based system to detect, track, label, and count vehicles using YOLO and tracking algorithms.
-“I used a pretrained YOLOv8n model provided by Ultralytics and fine-tuned it on a custom car-only dataset using bounding box annotations. The training process adapts the model specifically for vehicle detection in traffic scenes. After training completes, a fine-tuned model (best.pt) is generated, which I use for detection, tracking, and vehicle counting in my project.”
+This project implements a real-time vehicle detection, tracking, and counting
+system using YOLOv8 and OpenCV. It assigns unique IDs to vehicles and counts them
+when they cross a virtual counting line, avoiding double counting.
 
-Like yolo has more than 70 casses , now iam finetuning it only for one class:car
+The system simulates real-world traffic monitoring use cases such as traffic
+flow analysis and intelligent transportation systems.
 
-You can remember it like this:
+## Features
+- YOLOv8-based real-time vehicle detection
+- Unique ID assignment for multi-object tracking
+- Virtual counting line logic to avoid duplicate counts
+- Annotated output video with bounding boxes, IDs, and count
+- End-to-end computer vision pipeline
 
-1️⃣ Took a pretrained YOLOv8 model from Ultralytics
-2️⃣ Used transfer learning
-3️⃣ Provided a custom car-only dataset
-4️⃣ Fine-tuned the model using bounding box annotations
-5️⃣ Produced a custom trained model (best.pt) for car detection
+## Tech Stack
+- Python
+- YOLOv8
+- OpenCV
+- NumPy
 
+## How it Works
+1. Vehicles are detected frame-by-frame using a YOLOv8 model
+2. Each detected vehicle is assigned a unique tracking ID
+3. Vehicles are counted when they cross a predefined virtual line
+4. An annotated output video is generated with the live count
 
-This project implements an AI-based vehicle detection, tracking, and counting system using YOLOv8.
-The system detects cars from traffic images/video, assigns unique IDs to each vehicle, and accurately counts vehicles as they cross a virtual counting line.
-
-The project demonstrates a complete computer vision pipeline, starting from dataset preparation and model training to real-time vehicle counting.
-
-🎯 Objectives of the Project
-
-Detect only cars in traffic scenes
-
-Track each car across multiple frames using a unique ID
-
-Count each vehicle only once
-
-Avoid double counting
-
-Build a real-world traffic monitoring solution
-
-🧠 Technologies & Tools Used
-
-Python
-
-YOLOv8 (Ultralytics)
-
-OpenCV
-
-NumPy
-
-SciPy
-
-VS Code
+## How to Run
+```bash
+pip install -r requirements.txt
+python test.py
