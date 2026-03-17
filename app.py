@@ -1,10 +1,7 @@
-import streamlit as st
+from flask import Flask
 
-st.title("🚗 Vehicle Detection System")
+app = Flask(__name__)
 
-uploaded_file = st.file_uploader("Upload a video", type=["mp4", "avi"])
-
-if uploaded_file:
-    st.video(uploaded_file)
-
-st.write("⚠️ Detection demo version (UI working)")
+@app.route('/')
+def home():
+    return "🚗 Vehicle Detection API Running Successfully!"
