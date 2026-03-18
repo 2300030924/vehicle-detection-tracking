@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import streamlit as st
 import tempfile
 import time
@@ -31,7 +30,7 @@ iou = st.sidebar.slider("IOU Threshold", 0.1, 1.0, 0.7)
 st.sidebar.markdown("---")
 st.sidebar.info("This app uses YOLOv8 + Centroid Tracking")
 
-# ---------- DEMO VIDEO SECTION ----------
+# ---------- DEMO VIDEO ----------
 st.markdown("### 🎬 Try Demo Video")
 
 if st.button("▶️ Run Demo Video"):
@@ -44,7 +43,6 @@ if st.button("▶️ Run Demo Video"):
         st.subheader("📥 Demo Input")
         st.video(sample_path)
 
-    # Progress
     progress = st.progress(0)
     status = st.empty()
 
@@ -74,16 +72,13 @@ if uploaded_video:
 
     col1, col2 = st.columns(2)
 
-    # ---------- INPUT VIDEO ----------
     with col1:
         st.subheader("📥 Input Video")
         st.video(uploaded_video)
 
-    # Save video temporarily
     temp_input = tempfile.NamedTemporaryFile(delete=False)
     temp_input.write(uploaded_video.read())
 
-    # ---------- PROGRESS BAR ----------
     progress = st.progress(0)
     status = st.empty()
 
@@ -97,7 +92,6 @@ if uploaded_video:
 
     output_path = "output.mp4"
 
-    # ---------- RUN MODEL ----------
     process_video(temp_input.name, output_path)
 
     progress.progress(100)
@@ -105,12 +99,10 @@ if uploaded_video:
 
     st.success("🎉 Detection Finished Successfully!")
 
-    # ---------- OUTPUT VIDEO ----------
     with col2:
         st.subheader("📤 Output Video")
         st.video(output_path)
 
-    # ---------- METRICS ----------
     st.markdown("### 📊 Summary")
 
     col3, col4, col5 = st.columns(3)
@@ -119,7 +111,6 @@ if uploaded_video:
     col4.metric("Tracking", "Centroid")
     col5.metric("Status", "Completed ✅")
 
-    # ---------- DOWNLOAD ----------
     with open(output_path, "rb") as f:
         st.download_button(
             label="⬇️ Download Processed Video",
@@ -131,43 +122,3 @@ if uploaded_video:
 # ---------- FOOTER ----------
 st.markdown("---")
 st.markdown("👩‍💻 Developed by Bhavya Sri | 🚀 AI & Computer Vision Project")
-=======
-from flask import Flask, request, jsonify
-from ultralytics import YOLO
-import cv2
-import tempfile
-
-app = Flask(__name__)
-
-model = YOLO("yolov8n.pt")
-
-@app.route('/')
-def home():
-    return "🚗 Vehicle Detection API Running!"
-
-@app.route('/detect', methods=['POST'])
-def detect():
-    file = request.files['file']
-
-    temp_file = tempfile.NamedTemporaryFile(delete=False)
-    file.save(temp_file.name)
-
-    cap = cv2.VideoCapture(temp_file.name)
-
-    count = 0
-
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
-
-        results = model(frame)
-        count += len(results[0].boxes)
-
-    cap.release()
-
-    return jsonify({"vehicle_count": count})
-
-if __name__ == "__main__":
-    app.run()
->>>>>>> de04d38e7243f89bc8c3996497b13d0a46597354
