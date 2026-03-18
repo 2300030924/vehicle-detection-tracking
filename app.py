@@ -30,7 +30,7 @@ iou = st.sidebar.slider("IOU Threshold", 0.1, 1.0, 0.7)
 st.sidebar.markdown("---")
 st.sidebar.info("This app uses YOLOv8 + Centroid Tracking")
 
-# ---------- DEMO VIDEO ----------
+# ---------- DEMO VIDEO SECTION ----------
 st.markdown("### 🎬 Try Demo Video")
 
 if st.button("▶️ Run Demo Video"):
@@ -43,6 +43,7 @@ if st.button("▶️ Run Demo Video"):
         st.subheader("📥 Demo Input")
         st.video(sample_path)
 
+    # Progress
     progress = st.progress(0)
     status = st.empty()
 
@@ -72,13 +73,16 @@ if uploaded_video:
 
     col1, col2 = st.columns(2)
 
+    # ---------- INPUT VIDEO ----------
     with col1:
         st.subheader("📥 Input Video")
         st.video(uploaded_video)
 
+    # Save video temporarily
     temp_input = tempfile.NamedTemporaryFile(delete=False)
     temp_input.write(uploaded_video.read())
 
+    # ---------- PROGRESS BAR ----------
     progress = st.progress(0)
     status = st.empty()
 
@@ -92,6 +96,7 @@ if uploaded_video:
 
     output_path = "output.mp4"
 
+    # ---------- RUN MODEL ----------
     process_video(temp_input.name, output_path)
 
     progress.progress(100)
@@ -99,10 +104,12 @@ if uploaded_video:
 
     st.success("🎉 Detection Finished Successfully!")
 
+    # ---------- OUTPUT VIDEO ----------
     with col2:
         st.subheader("📤 Output Video")
         st.video(output_path)
 
+    # ---------- METRICS ----------
     st.markdown("### 📊 Summary")
 
     col3, col4, col5 = st.columns(3)
@@ -111,6 +118,7 @@ if uploaded_video:
     col4.metric("Tracking", "Centroid")
     col5.metric("Status", "Completed ✅")
 
+    # ---------- DOWNLOAD ----------
     with open(output_path, "rb") as f:
         st.download_button(
             label="⬇️ Download Processed Video",
