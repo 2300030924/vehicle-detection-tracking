@@ -1,4 +1,4 @@
-# 🚗 Vehicle Detection, Tracking & Counting using YOLOv8
+#  Vehicle Detection, Tracking & Counting using YOLOv8
 
 This project implements an end-to-end vehicle detection, tracking, and counting system using YOLOv8 and OpenCV. It assigns unique IDs to vehicles and counts them when they cross a virtual counting line, ensuring accurate and non-duplicate counting.
 
@@ -6,7 +6,7 @@ The system simulates real-world traffic monitoring applications such as traffic 
 
 ---
 
-## 🚗 Demo
+## Demo
 
 ![Vehicle Detection Output](https://github.com/user-attachments/assets/63c78fb8-0ec5-4ad6-b3c7-d7f87cf6a0e9)
 
