@@ -13,6 +13,8 @@ class CentroidTracker:
         self.objects[self.nextObjectID] = centroid
         self.disappeared[self.nextObjectID] = 0
         self.nextObjectID += 1
+        print("Registering ID:", self.nextObjectID)
+
 
     def deregister(self, objectID):
         del self.objects[objectID]
@@ -50,6 +52,8 @@ class CentroidTracker:
 
             for (row, col) in zip(rows, cols):
                 if row in usedRows or col in usedCols:
+                    continue
+                if D[row, col] > 50:   # adjust value (try 40–80)
                     continue
 
                 objectID = objectIDs[row]

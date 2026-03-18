@@ -1,81 +1,90 @@
 from ultralytics import YOLO
 import cv2
-import os
 from tracker import CentroidTracker
 
-# Load trained YOLO model
-model = YOLO("runs/detect/vehicle_detection/weights/best.pt")
+def process_video(input_path, output_path):
+    model = YOLO("yolov8n.pt")   # lightweight model
+    vehicle_classes = [1, 2, 3, 5, 7]
 
-# Initialize tracker
-tracker = CentroidTracker(max_disappeared=40)
+    tracker = CentroidTracker(max_disappeared=10)
 
-# Counting line position (Y-axis)
-LINE_Y = 300
+    LINE_Y = 100   # 🔥 TOP POSITION (fixed here only once)
+    total_count = 0
+    counted_ids = set()
 
-# Vehicle count
-total_count = 0
-counted_ids = set()
+    cap = cv2.VideoCapture(input_path)
 
-# Use validation images as frames (acts like video)
-image_folder = "dataset/val/images"
-image_files = sorted(os.listdir(image_folder))
+    width = 640
+    height = 480
 
-for image_name in image_files:
-    image_path = os.path.join(image_folder, image_name)
-    frame = cv2.imread(image_path)
+    fourcc = cv2.VideoWriter_fourcc(*'avc1')
+    out = cv2.VideoWriter(output_path, fourcc, 10.0, (width, height), True)  # lower FPS
 
-    results = model(frame, conf=0.4)
+    frame_count = 0  # 🔥 for skipping frames
 
-    rects = []
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
 
-    for result in results:
-        for box in result.boxes:
-            x1, y1, x2, y2 = map(int, box.xyxy[0])
-            rects.append((x1, y1, x2, y2))
+        frame_count += 1
 
-    objects = tracker.update(rects)
+        # 🔥 SPEED BOOST: process only every 5th frame
+        if frame_count % 5 != 0:
+            continue
 
-    # Draw counting line
-    cv2.line(frame, (0, LINE_Y), (frame.shape[1], LINE_Y), (255, 0, 0), 2)
+        # 🔥 resize for faster processing
+        frame = cv2.resize(frame, (640, 480))
 
-    # Draw bounding boxes
-    for (x1, y1, x2, y2) in rects:
-        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        results = model(frame, conf=0.5, iou=0.7)
 
-    # Draw IDs and count vehicles
-    for objectID, centroid in objects.items():
-        cX, cY = centroid
+        rects = []
 
-        # Count vehicle if it crosses the line
-        if objectID not in counted_ids and cY > LINE_Y:
-            counted_ids.add(objectID)
-            total_count += 1
+        for result in results:
+            for box in result.boxes:
+                cls = int(box.cls[0])
 
-        cv2.putText(
-            frame,
-            f"ID {objectID}",
-            (cX - 10, cY - 10),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.6,
-            (0, 0, 255),
-            2
-        )
-        cv2.circle(frame, (cX, cY), 4, (0, 0, 255), -1)
+                if cls in vehicle_classes:
+                    x1, y1, x2, y2 = map(int, box.xyxy[0])
 
-    # Display count
-    cv2.putText(
-        frame,
-        f"Vehicle Count: {total_count}",
-        (20, 40),
-        cv2.FONT_HERSHEY_SIMPLEX,
-        1,
-        (0, 0, 255),
-        3
-    )
+                    area = (x2 - x1) * (y2 - y1)
 
-    cv2.imshow("Vehicle Detection, Tracking & Counting", frame)
-    key = cv2.waitKey(300)
-    if key == 27:
-        break
+                    if area > 3000:
+                        rects.append((x1, y1, x2, y2))
 
-cv2.destroyAllWindows()
+                        class_name = model.names[cls]
+                        cv2.putText(frame, class_name, (x1, y1 - 10),
+                                    cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+                                    (0, 255, 0), 2)
+
+        objects = tracker.update(rects)
+
+        # 🔥 draw line (thicker for visibility)
+        cv2.line(frame, (0, LINE_Y), (frame.shape[1], LINE_Y), (255, 0, 0), 4)
+
+        # draw bounding boxes
+        for (x1, y1, x2, y2) in rects:
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+
+        # 🔥 tracking + counting (robust)
+        for objectID, centroid in objects.items():
+            cX, cY = centroid
+
+            # ✅ buffer zone to avoid missed counts
+            if objectID not in counted_ids and (LINE_Y - 20) < cY < (LINE_Y + 20):
+                counted_ids.add(objectID)
+                total_count += 1
+
+            cv2.putText(frame, f"ID {objectID}", (cX - 10, cY - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
+
+            cv2.circle(frame, (cX, cY), 4, (0, 0, 255), -1)
+
+        # display total count
+        cv2.putText(frame, f"Vehicle Count: {total_count}", (20, 40),
+                    cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
+
+        out.write(frame)
+
+    cap.release()
+    out.release()
